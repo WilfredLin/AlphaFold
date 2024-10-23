@@ -1,0 +1,26 @@
+import requests
+
+class AlphaFoldAPI:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    def predict_structure(self, protein_sequence):
+        url = f"{self.base_url}/predict"
+        payload = {'sequence': protein_sequence}
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"Error: {response.status_code} - {response.text}")
+
+# Example usage
+if __name__ == '__main__':
+    # Replace with the actual AlphaFold API URL
+    alpha_fold_url = 'http://alphafold.api.url'
+    alpha_fold_api = AlphaFoldAPI(alpha_fold_url)
+    protein_sequence = 'MVLTIYPDELVQIVSDKLAE'  # Example protein sequence
+    try:
+        structure = alpha_fold_api.predict_structure(protein_sequence)
+        print(structure)
+    except Exception as e:
+        print(e)
