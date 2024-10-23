@@ -1,0 +1,85 @@
+import requests
+
+class AlphaFoldAPI:
+    def __init__(self, base_url):
+        """
+        Initialize the AlphaFoldAPI with the base URL for the AlphaFold API.
+
+        :param base_url: The base URL for the AlphaFold API.
+        """
+        self.base_url = base_url
+
+    def predict_structure(self, protein_sequence):
+        """
+        Predict the protein structure based on the given protein sequence.
+
+        :param protein_sequence: A string representing the protein sequence.
+        :return: A JSON response containing the predicted structure.
+        :raises Exception: If the API request fails.
+        """
+        url = f"{self.base_url}/predict"
+        payload = {'sequence': protein_sequence}
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"Error: {response.status_code} - {response.text}")
+
+class mRNA:
+    def __init__(self, sequence):
+        """
+        Initialize the mRNA with a given sequence.
+
+        :param sequence: A string representing the mRNA sequence.
+        """
+        self.sequence = sequence
+
+    def translate(self):
+        """
+        Translate the mRNA sequence into a protein sequence.
+
+        :return: A string representing the translated protein sequence.
+        """
+        codon_table = {
+            'AUG': 'M', 'UUC': 'F', 'UUA': 'L', 'UUG': 'L', 'UCU': 'S',
+            'UCC': 'S', 'UCA': 'S', 'UCG': 'S', 'UAU': 'Y', 'UAC': 'Y',
+            'UGU': 'C', 'UGC': 'C', 'UGA': '', 'UAA': '', 'UAG': '',
+            'CUU': 'L', 'CUC': 'L', 'CCA': 'P', 'CCU': 'P', 'CCG': 'P',
+            'CUG': 'L', 'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'ACU': 'T',
+            'ACC': 'T', 'ACA': 'T', 'ACG': 'T', 'AUG': 'M', 'GUU': 'V',
+            'GUC': 'V', 'GUA': 'V', 'GUG': 'V', 'GCU': 'A', 'GCC': 'A',
+            'GCA': 'A', 'GCG': 'A', 'GGU': 'G', 'GGC': 'G', 'GGA': 'G',
+            'GGG': 'G'
+        }
+        
+        protein_sequence = ""
+        for i in range(0, len(self.sequence), 3):
+            codon = self.sequence[i:i+3]
+            if codon in codon_table:
+                amino_acid = codon_table[codon]
+                protein_sequence += amino_acid
+            if codon == 'AUG':
+                start_found = True
+            if codon in ['UGA', 'UAA', 'UAG']:
+                break
+
+        return protein_sequence
+
+# Example usage
+if __name__ == '__main__':
+    # Replace with the actual AlphaFold API URL
+    alpha_fold_url = 'http://alphafold.api.url'
+    alpha_fold_api = AlphaFoldAPI(alpha_fold_url)
+
+    # Example mRNA sequence
+    mrna_sequence = 'AUGUUCUGCUUAA'  # Example mRNA sequence
+    mrna = mRNA(mrna_sequence)
+    protein_sequence = mrna.translate()
+    
+    print(f'Translated Protein Sequence: {protein_sequence}')
+    
+    try:
+        structure = alpha_fold_api.predict_structure(protein_sequence)
+        print(structure)
+    except Exception as e:
+        print(e)
